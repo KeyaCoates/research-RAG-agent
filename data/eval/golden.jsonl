@@ -1,0 +1,3 @@
+{"question": "What BLEU score did the Transformer get on WMT 2014 English-to-German?", "answer": "28.4", "sources": ["attention"]}
+{"question": "What top-5 error did residual networks get on ImageNet?", "answer": "3.57 percent", "sources": ["resnet"]}
+{"question": "Which method pairs a seq2seq generator with a dense retriever over Wikipedia?", "answer": "RAG", "sources": ["rag"]}

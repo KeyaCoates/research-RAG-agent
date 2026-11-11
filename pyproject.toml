@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ragassist"
+version = "0.1.0"
+description = "Agentic RAG assistant over a mixed corpus, deployed on GCP, CI/CD on Azure DevOps"
+requires-python = ">=3.11"
+dependencies = [
+  "pydantic>=2.6",
+  "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+gcp = ["google-genai>=1.0", "google-cloud-storage>=2.16", "google-cloud-aiplatform>=1.60"]
+api = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "sse-starlette>=2.0"]
+agents = ["google-adk>=1.0"]
+obs = ["opentelemetry-sdk>=1.24", "opentelemetry-exporter-gcp-trace>=1.7"]
+dev = ["pytest>=8", "pytest-cov", "ruff>=0.4"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
