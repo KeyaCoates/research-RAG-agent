@@ -21,7 +21,7 @@ from ragassist.retrieval.hybrid import HashingEmbedder, HybridIndex
 def load_index(corpus: pathlib.Path) -> HybridIndex:
     chunks = []
     for p in sorted(corpus.glob("*.md")):
-        chunks += chunk_document(p.stem, p.read_text())
+        chunks += chunk_document(p.stem, p.read_text(encoding="utf-8"))
     return HybridIndex(chunks, HashingEmbedder())
 
 
@@ -36,7 +36,11 @@ def main() -> int:
     a = ap.parse_args()
 
     index = load_index(a.corpus)
-    golden = [json.loads(l) for l in a.golden.read_text().splitlines() if l.strip()]
+    golden = [
+        json.loads(line)
+        for line in a.golden.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
     results = {}
     for mode in a.modes:
         rec, mrr = [], []
@@ -48,7 +52,7 @@ def main() -> int:
         results[mode] = {f"recall@{a.k}": round(mean(rec), 3), "mrr": round(mean(mrr), 3), "n": len(golden)}
 
     a.out.parent.mkdir(parents=True, exist_ok=True)
-    a.out.write_text(json.dumps(results, indent=2))
+    a.out.write_text(json.dumps(results, indent=2), encoding="utf-8")
     print(f"{'mode':8} {'recall@'+str(a.k):10} mrr")
     for m, r in results.items():
         print(f"{m:8} {r[f'recall@{a.k}']:<10} {r['mrr']}")
