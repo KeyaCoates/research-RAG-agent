@@ -1,17 +1,23 @@
 {
   "bm25": {
-    "recall@5": 0.975,
-    "mrr": 0.953,
-    "n": 59
+    "doc_recall@5": 0.966,
+    "doc_mrr": 0.936,
+    "n": 59,
+    "chunk_recall@5": 0.89,
+    "chunk_mrr": 0.798
   },
   "dense": {
-    "recall@5": 0.941,
-    "mrr": 0.799,
-    "n": 59
+    "doc_recall@5": 0.941,
+    "doc_mrr": 0.808,
+    "n": 59,
+    "chunk_recall@5": 0.619,
+    "chunk_mrr": 0.472
   },
   "hybrid": {
-    "recall@5": 0.932,
-    "mrr": 0.887,
-    "n": 59
+    "doc_recall@5": 0.958,
+    "doc_mrr": 0.882,
+    "n": 59,
+    "chunk_recall@5": 0.873,
+    "chunk_mrr": 0.671
   }
 }

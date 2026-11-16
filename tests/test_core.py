@@ -13,6 +13,24 @@ def test_sections_and_parent_child():
     assert len({c.id for c in chunks}) == len(chunks)
 
 
+def test_long_paragraph_is_not_cut_mid_sentence():
+    sentences = [f"Sentence number {i} says something useful about flight." for i in range(30)]
+    chunks = chunk_document("d", "# A\n" + " ".join(sentences), max_chars=200)
+    assert len(chunks) > 1
+    for s in sentences:
+        assert any(s in c.text for c in chunks), f"sentence was split: {s}"
+
+
+def test_evidence_scoring():
+    from ragassist.eval.metrics import evidence_recall, evidence_reciprocal_rank
+
+    texts = ["nothing here", "the  altimeter\nfreezes at the blockage altitude"]
+    q = ["the altimeter freezes at the blockage altitude"]
+    assert evidence_recall(q, texts) == 1.0
+    assert evidence_reciprocal_rank(q, texts) == 0.5
+    assert evidence_recall(["absent quote"], texts) == 0.0
+
+
 def test_hash_changes_with_content():
     a = chunk_document("d", "# A\nhello")[0].meta["hash"]
     b = chunk_document("d", "# A\nhello world")[0].meta["hash"]

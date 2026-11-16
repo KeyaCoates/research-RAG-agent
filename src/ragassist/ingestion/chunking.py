@@ -43,23 +43,43 @@ def split_sections(text: str) -> list[tuple[str, str]]:
     return sections
 
 
-def _pack(paragraphs: list[str], max_chars: int) -> list[str]:
-    out, cur = [], ""
+SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+
+
+def _units(paragraphs: list[str], max_chars: int) -> list[str]:
+    """Break text into units that are never cut mid-sentence (unless one sentence alone is too long)."""
+    units: list[str] = []
     for p in paragraphs:
-        # hard-split oversized paragraphs
-        while len(p) > max_chars:
-            if cur:
-                out.append(cur)
-                cur = ""
-            out.append(p[:max_chars])
-            p = p[max_chars:]
-        if cur and len(cur) + len(p) + 2 > max_chars:
-            out.append(cur)
-            cur = p
-        else:
-            cur = f"{cur}\n\n{p}" if cur else p
+        if len(p) <= max_chars:
+            units.append(p)
+            continue
+        for s in SENTENCE_END.split(p):
+            while len(s) > max_chars:  # last resort for a single giant sentence
+                units.append(s[:max_chars])
+                s = s[max_chars:]
+            if s:
+                units.append(s)
+    return units
+
+
+def _pack(paragraphs: list[str], max_chars: int, overlap: int = 1) -> list[str]:
+    """Pack units into chunks of up to max_chars. The last `overlap` unit(s) of each chunk are
+    repeated at the start of the next one, so a passage that spans a boundary still appears whole."""
+    out: list[str] = []
+    cur: list[str] = []
+    size = 0
+    for u in _units(paragraphs, max_chars):
+        if cur and size + len(u) + 1 > max_chars:
+            out.append("\n".join(cur))
+            keep = cur[-overlap:] if overlap else []
+            if keep and sum(len(x) + 1 for x in keep) + len(u) + 1 > max_chars:
+                keep = []
+            cur = list(keep)
+            size = sum(len(x) + 1 for x in cur)
+        cur.append(u)
+        size += len(u) + 1
     if cur:
-        out.append(cur)
+        out.append("\n".join(cur))
     return out
 
 
