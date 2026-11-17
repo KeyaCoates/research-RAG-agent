@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pathlib
 import sys
 
@@ -32,11 +33,11 @@ from ragassist.ingestion.chunking import chunk_document
 from ragassist.retrieval.hybrid import HashingEmbedder, HybridIndex
 
 
-def load_index(corpus: pathlib.Path) -> HybridIndex:
+def load_index(corpus: pathlib.Path, embedder=None) -> HybridIndex:
     chunks = []
     for p in sorted(pathlib.Path(corpus).glob("*.md")):
         chunks += chunk_document(p.stem, p.read_text(encoding="utf-8"))
-    return HybridIndex(chunks, HashingEmbedder())
+    return HybridIndex(chunks, embedder or HashingEmbedder())
 
 
 def load_golden(path: pathlib.Path) -> list[dict]:
@@ -52,9 +53,26 @@ def main() -> int:
     ap.add_argument("--k", type=int, default=5)
     ap.add_argument("--min-recall", type=float, default=0.0)
     ap.add_argument("--out", type=pathlib.Path, default="eval-results/results.json")
+    ap.add_argument("--embedder", choices=["hash", "vertex", "gemini"], default="hash",
+                    help="hash = offline stand-in, vertex = Vertex AI, "
+                         "gemini = Gemini API with GEMINI_API_KEY (free AI Studio key)")
+    ap.add_argument("--project", default=None, help="GCP project id (for --embedder vertex)")
+    ap.add_argument("--location", default=None, help="GCP region, default us-central1")
     a = ap.parse_args()
 
-    index = load_index(a.corpus)
+    embedder = None
+    if a.embedder in ("vertex", "gemini"):
+        if a.embedder == "gemini" and not os.getenv("GEMINI_API_KEY"):
+            print("Set GEMINI_API_KEY first (see README).", file=sys.stderr)
+            return 2
+        if a.project:
+            os.environ["GCP_PROJECT"] = a.project
+        if a.location:
+            os.environ["GCP_REGION"] = a.location
+        from ragassist.retrieval.embedders import VertexEmbedder
+
+        embedder = VertexEmbedder()
+    index = load_index(a.corpus, embedder)
     golden = load_golden(a.golden)
     has_evidence = all(g.get("evidence") for g in golden)
     results = {}

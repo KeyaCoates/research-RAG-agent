@@ -1,0 +1,23 @@
+{
+  "bm25": {
+    "doc_recall@5": 0.966,
+    "doc_mrr": 0.936,
+    "n": 59,
+    "chunk_recall@5": 0.89,
+    "chunk_mrr": 0.798
+  },
+  "dense": {
+    "doc_recall@5": 0.941,
+    "doc_mrr": 0.934,
+    "n": 59,
+    "chunk_recall@5": 0.839,
+    "chunk_mrr": 0.695
+  },
+  "hybrid": {
+    "doc_recall@5": 0.949,
+    "doc_mrr": 0.959,
+    "n": 59,
+    "chunk_recall@5": 0.915,
+    "chunk_mrr": 0.829
+  }
+}
