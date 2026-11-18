@@ -15,7 +15,7 @@ class Settings:
     gcp_project: str = _env("GCP_PROJECT", "")
     gcp_region: str = _env("GCP_REGION", "us-central1")
     generation_model: str = _env("GENERATION_MODEL", "gemini-2.5-flash")
-    router_model: str = _env("ROUTER_MODEL", "gemini-2.5-flash-lite")
+    router_model: str = _env("ROUTER_MODEL", "gemini-3.5-flash-lite")
     embedding_model: str = _env("EMBEDDING_MODEL", "text-embedding-005")
     docs_bucket: str = _env("DOCS_BUCKET", "")
     llm_backend: str = _env("LLM_BACKEND", "fake")  # "fake" | "vertex"

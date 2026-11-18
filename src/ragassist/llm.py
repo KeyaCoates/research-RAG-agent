@@ -50,5 +50,35 @@ class VertexLLM:
         raise RuntimeError("unreachable")
 
 
+class CachedLLM:
+    """Wraps any LLM and saves every reply to disk, keyed by model + prompt. Re-running an eval then
+    costs nothing and returns identical answers, which also makes results reproducible."""
+
+    def __init__(self, inner, path: str = "data/index/llm_cache.json"):
+        import json
+        import pathlib
+
+        self.inner = inner
+        self.path = pathlib.Path(path)
+        self._json = json
+        self.cache: dict[str, list] = (
+            json.loads(self.path.read_text(encoding="utf-8")) if self.path.exists() else {}
+        )
+        self.api_calls = 0  # real calls only; cache hits are not counted
+
+    def generate(self, prompt: str, model: str) -> LLMResult:
+        import hashlib
+
+        key = hashlib.sha256(f"{model}|{prompt}".encode()).hexdigest()
+        if key not in self.cache:
+            r = self.inner.generate(prompt, model)
+            self.api_calls += 1
+            self.cache[key] = [r.text, r.tokens_in, r.tokens_out]
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            self.path.write_text(self._json.dumps(self.cache), encoding="utf-8")
+        text, tin, tout = self.cache[key]
+        return LLMResult(text, tin, tout)
+
+
 def get_llm():
     return VertexLLM() if get_settings().llm_backend == "vertex" else FakeLLM()

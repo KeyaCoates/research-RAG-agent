@@ -1,0 +1,312 @@
+{
+  "summary": {
+    "baseline": {
+      "answerable_correct": 1.0,
+      "wrongly_declined": 0.0,
+      "unanswerable_declined": 1.0,
+      "avg_llm_calls": 2.0,
+      "avg_tokens_in": 973,
+      "avg_tokens_out": 27,
+      "n_answerable": 5,
+      "n_unanswerable": 6
+    },
+    "agentic": {
+      "answerable_correct": 1.0,
+      "wrongly_declined": 0.0,
+      "unanswerable_declined": 1.0,
+      "avg_llm_calls": 3.45,
+      "avg_tokens_in": 1770,
+      "avg_tokens_out": 64,
+      "n_answerable": 5,
+      "n_unanswerable": 6
+    }
+  },
+  "rows": {
+    "baseline": [
+      {
+        "question": "What gases make up the atmosphere, and in what percentages?",
+        "answerable": true,
+        "answer": "The atmosphere is composed of 78 percent nitrogen, 21 percent oxygen, and 1 percent other gases such as argon or helium [phak_ch04].",
+        "declined": false,
+        "correct": true,
+        "attempts": 1,
+        "verdicts": [],
+        "llm_calls": 2,
+        "tokens_in": 1253,
+        "tokens_out": 36
+      },
+      {
+        "question": "What is the standard sea level temperature and pressure?",
+        "answerable": true,
+        "answer": "The standard sea level temperature is 59 °F or 15 °C [phak_ch04, phak_ch08]. The standard sea level pressure is 29.92 inches of mercury (\"Hg) or 1,013.2 mb [phak_ch04].",
+        "declined": false,
+        "correct": true,
+        "attempts": 1,
+        "verdicts": [],
+        "llm_calls": 2,
+        "tokens_in": 949,
+        "tokens_out": 68
+      },
+      {
+        "question": "At what altitude does the atmosphere weigh half as much as at sea level?",
+        "answerable": true,
+        "answer": "The weight of the atmosphere is one-half of its sea level value at an altitude of 18,000 feet [phak_ch04].",
+        "declined": false,
+        "correct": true,
+        "attempts": 1,
+        "verdicts": [],
+        "llm_calls": 2,
+        "tokens_in": 1056,
+        "tokens_out": 34
+      },
+      {
+        "question": "What is density altitude?",
+        "answerable": true,
+        "answer": "Density altitude is pressure altitude corrected for variations from standard temperature [phak_ch08, phak_ch04]. It can also be defined as the vertical distance above sea level in the standard atmosphere at which a given air density is found [phak_ch04].",
+        "declined": false,
+        "correct": true,
+        "attempts": 1,
+        "verdicts": [],
+        "llm_calls": 2,
+        "tokens_in": 866,
+        "tokens_out": 58
+      },
+      {
+        "question": "What conditions lead to a high density altitude?",
+        "answerable": true,
+        "answer": "High density altitude is caused by high elevations, low atmospheric pressures, high temperatures, high humidity, or a combination of these factors [phak_ch04].",
+        "declined": false,
+        "correct": true,
+        "attempts": 1,
+        "verdicts": [],
+        "llm_calls": 2,
+        "tokens_in": 976,
+        "tokens_out": 33
+      },
+      {
+        "question": "What is the maximum takeoff weight of a Boeing 787?",
+        "answerable": false,
+        "answer": "I can't answer that from the provided sources.",
+        "declined": true,
+        "correct": false,
+        "attempts": 1,
+        "verdicts": [],
+        "llm_calls": 2,
+        "tokens_in": 764,
+        "tokens_out": 11
+      },
+      {
+        "question": "How does ADS-B In differ from ADS-B Out?",
+        "answerable": false,
+        "answer": "I can't answer that from the provided sources.",
+        "declined": true,
+        "correct": false,
+        "attempts": 1,
+        "verdicts": [],
+        "llm_calls": 2,
+        "tokens_in": 1033,
+        "tokens_out": 11
+      },
+      {
+        "question": "What are the current Part 107 requirements for commercial drone pilots?",
+        "answerable": false,
+        "answer": "I can't answer that from the provided sources.",
+        "declined": true,
+        "correct": false,
+        "attempts": 1,
+        "verdicts": [],
+        "llm_calls": 2,
+        "tokens_in": 1074,
+        "tokens_out": 11
+      },
+      {
+        "question": "What is the stall speed of a Cessna 172?",
+        "answerable": false,
+        "answer": "I can't answer that from the provided sources.",
+        "declined": true,
+        "correct": false,
+        "attempts": 1,
+        "verdicts": [],
+        "llm_calls": 2,
+        "tokens_in": 968,
+        "tokens_out": 11
+      },
+      {
+        "question": "How do fly-by-wire flight controls work?",
+        "answerable": false,
+        "answer": "I can't answer that from the provided sources.",
+        "declined": true,
+        "correct": false,
+        "attempts": 1,
+        "verdicts": [],
+        "llm_calls": 2,
+        "tokens_in": 926,
+        "tokens_out": 11
+      },
+      {
+        "question": "What are the dimensions of Class F airspace in the United States?",
+        "answerable": false,
+        "answer": "I can't answer that from the provided sources.",
+        "declined": true,
+        "correct": false,
+        "attempts": 1,
+        "verdicts": [],
+        "llm_calls": 2,
+        "tokens_in": 841,
+        "tokens_out": 11
+      }
+    ],
+    "agentic": [
+      {
+        "question": "What gases make up the atmosphere, and in what percentages?",
+        "answerable": true,
+        "answer": "The atmosphere is composed of 78 percent nitrogen, 21 percent oxygen, and 1 percent other gases such as argon or helium [phak_ch04].",
+        "declined": false,
+        "correct": true,
+        "attempts": 1,
+        "verdicts": [
+          "supported"
+        ],
+        "llm_calls": 4,
+        "tokens_in": 2720,
+        "tokens_out": 76
+      },
+      {
+        "question": "What is the standard sea level temperature and pressure?",
+        "answerable": true,
+        "answer": "The standard atmosphere at sea level has a surface temperature of 59 °F (15 °C) and a surface pressure of 29.92 inches of mercury (\"Hg) or 1,013.2 mb [phak_ch04].",
+        "declined": false,
+        "correct": true,
+        "attempts": 1,
+        "verdicts": [
+          "supported"
+        ],
+        "llm_calls": 4,
+        "tokens_in": 2113,
+        "tokens_out": 101
+      },
+      {
+        "question": "At what altitude does the atmosphere weigh half as much as at sea level?",
+        "answerable": true,
+        "answer": "The weight of the atmosphere is one-half of its sea level value at an altitude of 18,000 feet [phak_ch04].",
+        "declined": false,
+        "correct": true,
+        "attempts": 1,
+        "verdicts": [
+          "supported"
+        ],
+        "llm_calls": 4,
+        "tokens_in": 2327,
+        "tokens_out": 77
+      },
+      {
+        "question": "What is density altitude?",
+        "answerable": true,
+        "answer": "Density altitude is pressure altitude corrected for nonstandard temperature variations [phak_ch04, phak_ch08]. It is also defined as the vertical distance above sea level in the standard atmosphere at which a given density is found [phak_ch04].",
+        "declined": false,
+        "correct": true,
+        "attempts": 1,
+        "verdicts": [
+          "supported"
+        ],
+        "llm_calls": 4,
+        "tokens_in": 1959,
+        "tokens_out": 99
+      },
+      {
+        "question": "What conditions lead to a high density altitude?",
+        "answerable": true,
+        "answer": "High density altitude is caused by high elevations, low atmospheric pressures, high temperatures, high humidity, or a combination of these factors [phak_ch04].",
+        "declined": false,
+        "correct": true,
+        "attempts": 1,
+        "verdicts": [
+          "supported"
+        ],
+        "llm_calls": 4,
+        "tokens_in": 2160,
+        "tokens_out": 72
+      },
+      {
+        "question": "What is the maximum takeoff weight of a Boeing 787?",
+        "answerable": false,
+        "answer": "I can't answer that from the provided sources.",
+        "declined": true,
+        "correct": false,
+        "attempts": 0,
+        "verdicts": [],
+        "llm_calls": 1,
+        "tokens_in": 111,
+        "tokens_out": 28
+      },
+      {
+        "question": "How does ADS-B In differ from ADS-B Out?",
+        "answerable": false,
+        "answer": "I can't answer that from the provided sources.",
+        "declined": true,
+        "correct": false,
+        "attempts": 1,
+        "verdicts": [
+          "supported"
+        ],
+        "llm_calls": 4,
+        "tokens_in": 2256,
+        "tokens_out": 57
+      },
+      {
+        "question": "What are the current Part 107 requirements for commercial drone pilots?",
+        "answerable": false,
+        "answer": "I can't answer that from the provided sources.",
+        "declined": true,
+        "correct": false,
+        "attempts": 0,
+        "verdicts": [],
+        "llm_calls": 1,
+        "tokens_in": 112,
+        "tokens_out": 28
+      },
+      {
+        "question": "What is the stall speed of a Cessna 172?",
+        "answerable": false,
+        "answer": "I can't answer that from the provided sources.",
+        "declined": true,
+        "correct": false,
+        "attempts": 1,
+        "verdicts": [
+          "supported"
+        ],
+        "llm_calls": 4,
+        "tokens_in": 1818,
+        "tokens_out": 60
+      },
+      {
+        "question": "How do fly-by-wire flight controls work?",
+        "answerable": false,
+        "answer": "I can't answer that from the provided sources.",
+        "declined": true,
+        "correct": false,
+        "attempts": 1,
+        "verdicts": [
+          "supported"
+        ],
+        "llm_calls": 4,
+        "tokens_in": 2027,
+        "tokens_out": 49
+      },
+      {
+        "question": "What are the dimensions of Class F airspace in the United States?",
+        "answerable": false,
+        "answer": "I can't answer that from the provided sources.",
+        "declined": true,
+        "correct": false,
+        "attempts": 1,
+        "verdicts": [
+          "supported"
+        ],
+        "llm_calls": 4,
+        "tokens_in": 1872,
+        "tokens_out": 53
+      }
+    ]
+  }
+}

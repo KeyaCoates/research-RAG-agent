@@ -1,87 +1,38 @@
-# Azure Pipelines: CI (lint, tests, eval gate) -> build image -> deploy to GCP Cloud Run
-# staging -> manual approval -> prod. Works with this GitHub repo via the Azure Pipelines GitHub app.
-# Setup: docs/azure-devops.md
+# CI only: runs on Linux and Windows. No Google Cloud account or secrets needed.
+# The full pipeline (azure-pipelines.yml) adds the image build and deploys.
 trigger:
   branches: { include: [main] }
 pr:
   branches: { include: [main] }
 
-variables:
-  - group: gcp-rag            # variable group: GCP_PROJECT, GCP_REGION, WIF_PROVIDER, DEPLOY_SA, AR_REPO
-  - name: imageTag
-    value: $(Build.BuildId)
+strategy:
+  matrix:
+    linux:
+      imageName: ubuntu-latest
+    windows:
+      imageName: windows-latest
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: $(imageName)
 
-stages:
-  - stage: CI
-    jobs:
-      - job: test_and_eval
-        steps:
-          - task: UsePythonVersion@0
-            inputs: { versionSpec: '3.12' }
-          - script: pip install -e ".[dev,api]"
-            displayName: Install
-          - script: ruff check .
-            displayName: Lint
-          - script: pytest -q --junitxml=test-results.xml
-            displayName: Unit tests
-          - script: python -m ragassist.eval.run_eval --min-recall 0.6
-            displayName: Eval gate (fails build on retrieval regression)
-          - task: PublishTestResults@2
-            condition: succeededOrFailed()
-            inputs: { testResultsFiles: test-results.xml }
-          - publish: eval-results
-            artifact: eval-results
-            condition: succeededOrFailed()
-
-  - stage: Build
-    dependsOn: CI
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
-    jobs:
-      - job: image
-        steps:
-          # Keyless auth to GCP via Workload Identity Federation (no long-lived keys in Azure DevOps)
-          - script: |
-              curl -sSL -H "Authorization: Bearer $(System.AccessToken)" \
-                "$(System.CollectionUri)$(System.TeamProject)/_apis/distributedtask/hubs/build/plans/$(System.PlanId)/jobs/$(System.JobId)/oidctoken?api-version=7.1-preview.1&serviceConnectionId=$(GCP_WIF_CONNECTION_ID)" \
-                -X POST -H "Content-Length: 0" | jq -r .oidcToken > $(Agent.TempDirectory)/oidc.jwt
-              gcloud iam workload-identity-pools create-cred-config "$(WIF_PROVIDER)" \
-                --service-account="$(DEPLOY_SA)" --credential-source-file=$(Agent.TempDirectory)/oidc.jwt \
-                --output-file=$(Agent.TempDirectory)/cred.json
-              gcloud auth login --cred-file=$(Agent.TempDirectory)/cred.json
-            displayName: Authenticate to GCP (WIF)
-          - script: |
-              gcloud builds submit --project=$(GCP_PROJECT) \
-                --tag=$(GCP_REGION)-docker.pkg.dev/$(GCP_PROJECT)/$(AR_REPO)/rag:$(imageTag) .
-            displayName: Build and push image
-
-  - stage: Staging
-    dependsOn: Build
-    jobs:
-      - deployment: staging
-        environment: rag-staging
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
-                - script: |
-                    gcloud run deploy rag-staging --project=$(GCP_PROJECT) --region=$(GCP_REGION) \
-                      --image=$(GCP_REGION)-docker.pkg.dev/$(GCP_PROJECT)/$(AR_REPO)/rag:$(imageTag)
-                  displayName: Deploy to Cloud Run (staging)
-
-  - stage: Prod
-    dependsOn: Staging
-    jobs:
-      - deployment: prod
-        environment: rag-prod      # add an Approvals check on this environment in Azure DevOps
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - script: |
-                    gcloud run deploy rag-prod --project=$(GCP_PROJECT) --region=$(GCP_REGION) \
-                      --image=$(GCP_REGION)-docker.pkg.dev/$(GCP_PROJECT)/$(AR_REPO)/rag:$(imageTag)
-                  displayName: Deploy to Cloud Run (prod)
+steps:
+  - task: UsePythonVersion@0
+    inputs: { versionSpec: '3.12' }
+  - script: python -m pip install -e ".[dev,api]"
+    displayName: Install
+  - script: python -m ruff check .
+    displayName: Lint
+  - script: python -m pytest -q --junitxml=test-results.xml
+    displayName: Unit tests
+  # Offline eval gate: keyword search on the real corpus, no API key. Fails the build if passage
+  # recall drops below 0.85 (it is 0.89 today), so a chunking or scoring regression is caught.
+  - script: python -m ragassist.eval.run_eval --corpus data/phak/corpus --golden data/phak/golden.jsonl --modes bm25 hybrid --min-recall 0.85
+    displayName: Eval gate
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: test-results.xml
+      testRunTitle: tests-$(imageName)
+  - publish: eval-results
+    artifact: eval-results-$(imageName)
+    condition: succeededOrFailed()
