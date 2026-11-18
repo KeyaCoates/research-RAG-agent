@@ -1,6 +1,8 @@
-"""LLM backends. `fake` runs offline; `vertex` calls Gemini on Vertex AI."""
+"""LLM backends. `fake` runs offline; `vertex` calls Gemini (Vertex AI, or the Gemini API when
+GEMINI_API_KEY is set)."""
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 
 from ragassist.config import get_settings
@@ -27,12 +29,25 @@ class VertexLLM:
         from google import genai  # lazy import: optional dependency
 
         s = get_settings()
-        self.client = genai.Client(vertexai=True, project=s.gcp_project, location=s.gcp_region)
+        api_key = os.getenv("GEMINI_API_KEY")  # free Google AI Studio key
+        if api_key:
+            self.client = genai.Client(api_key=api_key)
+        else:
+            self.client = genai.Client(vertexai=True, project=s.gcp_project, location=s.gcp_region)
 
     def generate(self, prompt: str, model: str) -> LLMResult:
-        r = self.client.models.generate_content(model=model, contents=prompt)
-        u = r.usage_metadata
-        return LLMResult(r.text or "", u.prompt_token_count or 0, u.candidates_token_count or 0)
+        from ragassist.retrieval.embedders import _sleep, retry_delay
+
+        for attempt in range(6):
+            try:
+                r = self.client.models.generate_content(model=model, contents=prompt)
+                u = r.usage_metadata
+                return LLMResult(r.text or "", u.prompt_token_count or 0, u.candidates_token_count or 0)
+            except Exception as e:
+                if attempt == 5:
+                    raise
+                _sleep(retry_delay(str(e), attempt))  # rate limits say how long to wait
+        raise RuntimeError("unreachable")
 
 
 def get_llm():

@@ -7,17 +7,24 @@
     "chunk_mrr": 0.798
   },
   "dense": {
-    "doc_recall@5": 0.941,
-    "doc_mrr": 0.934,
+    "doc_recall@5": 0.949,
+    "doc_mrr": 0.958,
     "n": 59,
-    "chunk_recall@5": 0.839,
-    "chunk_mrr": 0.695
+    "chunk_recall@5": 0.898,
+    "chunk_mrr": 0.766
   },
   "hybrid": {
-    "doc_recall@5": 0.949,
-    "doc_mrr": 0.959,
+    "doc_recall@5": 0.958,
+    "doc_mrr": 0.963,
     "n": 59,
     "chunk_recall@5": 0.915,
-    "chunk_mrr": 0.829
+    "chunk_mrr": 0.862
+  },
+  "hybrid+rerank": {
+    "doc_recall@5": 0.992,
+    "doc_mrr": 0.97,
+    "n": 59,
+    "chunk_recall@5": 0.975,
+    "chunk_mrr": 0.912
   }
 }

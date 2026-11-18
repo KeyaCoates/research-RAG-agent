@@ -22,6 +22,7 @@ import os
 import pathlib
 import sys
 
+from ragassist.config import get_settings
 from ragassist.eval.metrics import (
     evidence_recall,
     evidence_reciprocal_rank,
@@ -58,7 +59,19 @@ def main() -> int:
                          "gemini = Gemini API with GEMINI_API_KEY (free AI Studio key)")
     ap.add_argument("--project", default=None, help="GCP project id (for --embedder vertex)")
     ap.add_argument("--location", default=None, help="GCP region, default us-central1")
+    ap.add_argument("--rerank-candidates", type=int, default=20,
+                    help="how many hybrid results the reranker sees (mode hybrid+rerank)")
     a = ap.parse_args()
+
+    reranker = None
+    if "hybrid+rerank" in a.modes:
+        if not os.getenv("GEMINI_API_KEY") and get_settings().llm_backend != "vertex":
+            print("hybrid+rerank needs GEMINI_API_KEY (or LLM_BACKEND=vertex).", file=sys.stderr)
+            return 2
+        from ragassist.llm import VertexLLM
+        from ragassist.retrieval.rerank import LLMReranker
+
+        reranker = LLMReranker(VertexLLM(), get_settings().router_model)
 
     embedder = None
     if a.embedder in ("vertex", "gemini"):
@@ -79,7 +92,11 @@ def main() -> int:
     for mode in a.modes:
         d_rec, d_mrr, c_rec, c_mrr = [], [], [], []
         for g in golden:
-            hits = [c for c, _ in index.search(g["question"], k=a.k, mode=mode)]
+            if mode == "hybrid+rerank":
+                cands = [c for c, _ in index.search(g["question"], k=a.rerank_candidates, mode="hybrid")]
+                hits = reranker.rerank(g["question"], cands, k=a.k)
+            else:
+                hits = [c for c, _ in index.search(g["question"], k=a.k, mode=mode)]
             ids = [c.doc_id for c in hits]
             rel = set(g["sources"])
             d_rec.append(recall_at_k(ids, rel, a.k))

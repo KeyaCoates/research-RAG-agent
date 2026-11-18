@@ -80,7 +80,11 @@ class HybridIndex:
     def search(self, query: str, k: int = 5, mode: str = "hybrid") -> list[tuple[Chunk, float]]:
         """mode: 'bm25' | 'dense' | 'hybrid' (used for the ablation table)."""
         lex = np.argsort(-self.bm25.scores(tokenize(query)))[: max(k * 4, 20)].tolist()
-        dense_scores = self.vecs @ self.embedder.embed([query])[0]
+        if hasattr(self.embedder, "embed_query"):  # real embedders treat queries differently from documents
+            qvec = self.embedder.embed_query(query)
+        else:
+            qvec = self.embedder.embed([query])[0]
+        dense_scores = self.vecs @ qvec
         den = np.argsort(-dense_scores)[: max(k * 4, 20)].tolist()
         if mode == "bm25":
             return [(self.chunks[i], 0.0) for i in lex[:k]]
