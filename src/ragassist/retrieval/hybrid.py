@@ -71,11 +71,12 @@ def rrf(rankings: list[list[int]], k: int = 60) -> list[tuple[int, float]]:
 
 
 class HybridIndex:
-    def __init__(self, chunks: list[Chunk], embedder: Embedder):
+    def __init__(self, chunks: list[Chunk], embedder: Embedder, vecs: np.ndarray | None = None):
+        """Pass `vecs` (one row per chunk) to reuse saved embeddings instead of embedding again."""
         self.chunks = chunks
         self.embedder = embedder
         self.bm25 = BM25([tokenize(c.text) for c in chunks])
-        self.vecs = embedder.embed([c.text for c in chunks])
+        self.vecs = vecs if vecs is not None else embedder.embed([c.text for c in chunks])
 
     def search(self, query: str, k: int = 5, mode: str = "hybrid") -> list[tuple[Chunk, float]]:
         """mode: 'bm25' | 'dense' | 'hybrid' (used for the ablation table)."""
